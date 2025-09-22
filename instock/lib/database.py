@@ -11,32 +11,35 @@ from sqlalchemy import inspect
 __author__ = 'myh '
 __date__ = '2023/3/10 '
 
-db_host = "192.168.1.106"  # 数据库服务主机
-db_user = "joing"  # 数据库访问用户
-db_password = "anlizi1314"  # 数据库访问密码
-db_database = "test_instockdb"  # 数据库名称
-db_port = 3306  # 数据库服务端口
-db_charset = "utf8mb4"  # 数据库字符集
+# 尝试加载环境变量文件
+try:
+    from dotenv import load_dotenv
+    # 根据环境变量加载对应的 .env 文件
+    env_file = f"env.{os.environ.get('ENV', 'dev')}"
+    if os.path.exists(env_file):
+        load_dotenv(env_file)
+        logging.info(f"已加载环境配置文件: {env_file}")
+except ImportError:
+    logging.info("未安装 python-dotenv，跳过环境文件加载")
 
-# 使用环境变量获得数据库,docker -e 传递
-_db_host = os.environ.get('db_host')
-if _db_host is not None:
-    db_host = _db_host
-_db_user = os.environ.get('db_user')
-if _db_user is not None:
-    db_user = _db_user
-_db_password = os.environ.get('db_password')
-if _db_password is not None:
-    db_password = _db_password
-_db_database = os.environ.get('db_database')
-if _db_database is not None:
-    db_database = _db_database
-_db_port = os.environ.get('db_port')
-if _db_port is not None:
-    db_port = int(_db_port)
+# 获取环境变量，默认为开发环境
+ENV = os.environ.get('ENV', 'dev').lower()
+
+# 直接从环境变量读取数据库配置
+db_host = os.environ.get('db_host')
+db_user = os.environ.get('db_user')
+db_password = os.environ.get('db_password')
+db_database = os.environ.get('db_database')
+db_port = int(os.environ.get('db_port'))
+db_charset = os.environ.get('db_charset', 'utf8mb4')
+
+# 检查必要的环境变量是否存在
+if not all([db_host, db_user, db_password, db_database]):
+    raise ValueError(f"缺少必要的数据库配置环境变量。当前环境: {ENV}")
 
 MYSQL_CONN_URL = "mysql+pymysql://%s:%s@%s:%s/%s?charset=%s" % (
     db_user, db_password, db_host, db_port, db_database, db_charset)
+logging.info(f"当前环境：{ENV}")
 logging.info(f"数据库链接信息：{ MYSQL_CONN_URL}")
 
 MYSQL_CONN_DBAPI = {'host': db_host, 'user': db_user, 'password': db_password, 'database': db_database,
