@@ -11,13 +11,47 @@ services:
     networks:
       - instock_network
 
-  instock:
+  instock-dev:
     image: mayanghua/instock:latest
-    container_name: InStock
+    container_name: InStock-Dev
     ports:
       - "9988:9988"
     environment:
+      ENV: dev
       db_host: InStockDbService
+      db_database: instock_dev
+    volumes:
+      - /data/instockproxy.txt:/data/InStock/instock/config/proxy.txt
+    depends_on:
+      - instockdbservice
+    networks:
+      - instock_network
+
+  instock-test:
+    image: mayanghua/instock:latest
+    container_name: InStock-Test
+    ports:
+      - "9989:9988"
+    environment:
+      ENV: test
+      db_host: InStockDbService
+      db_database: instock_test
+    volumes:
+      - /data/instockproxy.txt:/data/InStock/instock/config/proxy.txt
+    depends_on:
+      - instockdbservice
+    networks:
+      - instock_network
+
+  instock-prod:
+    image: mayanghua/instock:latest
+    container_name: InStock-Prod
+    ports:
+      - "9990:9988"
+    environment:
+      ENV: prod
+      db_host: InStockDbService
+      db_database: instock_prod
     volumes:
       - /data/instockproxy.txt:/data/InStock/instock/config/proxy.txt
     depends_on:
